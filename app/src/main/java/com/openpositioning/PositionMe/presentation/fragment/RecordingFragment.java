@@ -3,7 +3,6 @@ package com.openpositioning.PositionMe.presentation.fragment;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.SharedPreferences;
-import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.os.Bundle;
 import android.os.CountDownTimer;
@@ -19,10 +18,6 @@ import android.widget.Button;
 import android.widget.ImageView;
 import android.widget.ProgressBar;
 import android.widget.TextView;
-import android.widget.Toast;
-
-import com.google.android.gms.maps.model.BitmapDescriptorFactory;
-import com.google.android.gms.maps.model.MarkerOptions;
 import com.google.android.material.button.MaterialButton;
 
 import androidx.annotation.NonNull;
@@ -64,7 +59,7 @@ import com.google.android.gms.maps.model.LatLng;
 public class RecordingFragment extends Fragment {
 
     // UI elements
-    private MaterialButton completeButton, cancelButton, markTestPointButton;
+    private MaterialButton completeButton, cancelButton;
     private ImageView recIcon;
     private ProgressBar timeRemaining;
     private TextView elevation, distanceTravelled, gnssError;
@@ -81,8 +76,6 @@ public class RecordingFragment extends Fragment {
     private float distance = 0f;
     private float previousPosX = 0f;
     private float previousPosY = 0f;
-    private int testPointCounter = 0;
-
 
     // References to the child map fragment
     private TrajectoryMapFragment trajectoryMapFragment;
@@ -144,7 +137,6 @@ public class RecordingFragment extends Fragment {
 
         completeButton = view.findViewById(R.id.stopButton);
         cancelButton = view.findViewById(R.id.cancelButton);
-        markTestPointButton= view.findViewById(R.id.markPointButton);
         recIcon = view.findViewById(R.id.redDot);
         timeRemaining = view.findViewById(R.id.timeRemainingBar);
 
@@ -160,37 +152,6 @@ public class RecordingFragment extends Fragment {
             sensorFusion.stopRecording();
             // Show Correction screen
             ((RecordingActivity) requireActivity()).showCorrectionScreen();
-        });
-
-        markTestPointButton.setOnClickListener(v -> {
-            long timestampMillis = System.currentTimeMillis();
-
-            SensorFusion.getInstance().addTestPoint(timestampMillis);
-
-            float[] gnss = SensorFusion.getInstance().getGNSSLatitude(false);
-            if (gnss != null) {
-                double lat = gnss[0];
-                double lon = gnss[1];
-
-                SensorFusion.getInstance().addTestPoint(timestampMillis, lat, lon);
-
-                testPointCounter++;
-
-                if (trajectoryMapFragment != null) {
-                    trajectoryMapFragment.addTestPointMarker(
-                            new LatLng(lat, lon),
-                            testPointCounter
-                    );
-                }
-
-                Toast.makeText(requireContext(),
-                        "Test point " + testPointCounter + " marked",
-                        Toast.LENGTH_SHORT).show();
-            } else {
-                Toast.makeText(requireContext(),
-                        "GNSS not available yet",
-                        Toast.LENGTH_SHORT).show();
-            }
         });
 
 
